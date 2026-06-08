@@ -8,6 +8,7 @@ import mate.academy.dao.UserDao;
 import mate.academy.exception.DataProcessingException;
 import mate.academy.lib.Dao;
 import mate.academy.model.User;
+import org.hibernate.query.Query;
 
 @Dao
 public class UserDaoImpl extends AbstractDao implements UserDao {
@@ -24,29 +25,28 @@ public class UserDaoImpl extends AbstractDao implements UserDao {
             entityTransaction.begin();
             entityManager.persist(user);
             entityTransaction.commit();
+
             return user;
         } catch (Exception e) {
             if (entityTransaction != null && entityTransaction.isActive()) {
                 entityTransaction.rollback();
             }
 
-            throw new DataProcessingException("Can't create user " + user, e);
+            throw new DataProcessingException("Can't add new user " + user, e);
         }
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
         try (EntityManager entityManager = this.factory.createEntityManager()) {
-            return entityManager.createQuery("SELECT u "
-                                    + "FROM User u "
+            return entityManager.createQuery("FROM User "
                                     + "WHERE email = :email",
                             User.class)
                     .setParameter("email", email)
-                    .getResultList()
-                    .stream()
-                    .findFirst();
+                    .unwrap(Query.class)
+                    .uniqueResultOptional();
         } catch (Exception e) {
-            throw new DataProcessingException("Can't find user by email " + email, e);
+            throw new DataProcessingException("Can't find user with email " + email, e);
         }
     }
 }

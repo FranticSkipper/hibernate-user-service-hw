@@ -1,6 +1,6 @@
 package mate.academy.service;
 
-import javax.naming.AuthenticationException;
+import mate.academy.exception.AuthenticationException;
 import mate.academy.exception.RegistrationException;
 import mate.academy.model.User;
 
